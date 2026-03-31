@@ -150,7 +150,9 @@ if sats:
         lat="Lat",
         lon="Lon",
         hover_name="Name",
-        projection="orthographic",
+       fig = px.scatter_geo(df, lat="Lat", lon="Lon", hover_name="Name", 
+                    projection="orthographic", title="Live Global Orbital Traffic")
+st.plotly_chart(fig, use_container_width=True)
         title="Live Global Orbital Traffic"
     )
 

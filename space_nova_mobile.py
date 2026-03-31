@@ -7,9 +7,16 @@ st.set_page_config(page_title="Space Nova | Global", page_icon="🚀", layout="w
 
 # 2. DATA ENGINES (Cached for speed)
 @st.cache_resource
+@st.cache_resource
 def get_active_data():
+    # Adding a timeout to prevent the 10-minute hang
     url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle'
-    return load.tle_file(url)
+    try:
+        # We tell it to wait max 10 seconds
+        return load.tle_file(url, reload=True)
+    except:
+        st.error("Space Database is busy. Try refreshing in a moment!")
+        return None
 
 @st.cache_resource
 def get_debris_data():

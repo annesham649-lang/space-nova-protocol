@@ -1,73 +1,72 @@
 import streamlit as st
-from skyfield.api import load
 import pandas as pd
+from skyfield.api import load, wgs84
+from datetime import datetime
+import plotly.express as px
 
-# 1. PAGE CONFIG
-st.set_page_config(page_title="Space Nova | Global", page_icon="🚀", layout="wide")
-
-# 2. DATA ENGINES (Cached for speed)
+st.set_page_config(page_title="Space Nova Global Monitor", layout="wide")
 
 @st.cache_resource
 def get_active_data():
-    # Adding a timeout to prevent the 10-minute hang
+    # Using 'visual' group for faster cloud loading
     url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle'
     try:
-        # We tell it to wait max 10 seconds
-        return load.tle_file(url, reload=True)
-    except:
-        st.error("Space Database is busy. Try refreshing in a moment!")
+        # Load the satellite data
+        satellites = load.tle_file(url, reload=True)
+        return satellites
+    except Exception as e:
         return None
 
-@st.cache_resource
-def get_debris_data():
-    url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=1999-025&FORMAT=tle'
-    return load.tle_file(url)
+# --- UI Header ---
+st.title("🌌 Space Nova: Global Orbital Monitor")
+st.markdown("### Phase 7: Real-Time Governance & Sustainability Tracking")
 
-# 3. SIDEBAR CONTROL PANEL (Your Manual Governance)
-st.sidebar.header("🕹️ Mission Control")
-view_mode = st.sidebar.selectbox("Select Governance View", ["Active Assets", "Debris Fields"])
+# --- Sidebar Metrics ---
+st.sidebar.header("Satellite Status")
+st.sidebar.metric("Fuel Reserve", "90%", "+2%")
+st.sidebar.metric("Thermal Shield", "92%", "Stable")
+st.sidebar.info("Operational Mode: Active Governance")
 
-# 4. CORE LOGIC
-ts = load.timescale()
-t = ts.now()
+# --- Main Logic ---
+sats = get_active_data()
 
-if view_mode == "Debris Fields":
-    sats = get_debris_data()
-    st.title("⚠️ Debris Monitor: Danger Zones")
-    map_color = "#ff4b4b" # Red for danger
+if sats:
+    ts = load.timescale()
+    t = ts.now()
+    
+    sat_data = []
+    # Process first 100 satellites for performance
+    for sat in sats[:100]:
+        try:
+            geocentric = sat.at(t)
+            subpoint = wgs84.subpoint(geocentric)
+            sat_data.append({
+                "Name": sat.name,
+                "Lat": subpoint.latitude.degrees,
+                "Lon": subpoint.longitude.degrees,
+                "Alt": subpoint.elevation.km
+            })
+        except:
+            continue
+
+    df = pd.DataFrame(sat_data)
+
+    # Create the Map
+    fig = px.scatter_geo(df,
+                        lat='Lat',
+                        lon='Lon',
+                        hover_name='Name',
+                        projection="natural earth",
+                        title="Live Satellite Positions")
+    
+    fig.update_geos(showcoastlines=True, coastlinecolor="RebeccaPurple",
+                    showland=True, landcolor="LightGreen",
+                    showocean=True, oceancolor="LightBlue")
+
+    st.plotly_chart(fig, use_container_width=True)
+    st.success(f"Tracking {len(df)} active objects in real-time.")
 else:
-    sats = get_active_data()
-    st.title("🛰️ Space Nova: Global Monitor")
-    map_color = "#00fbff" # Cyan for active
+    st.error("Space Database (Celestrak) is currently busy. Please refresh the page in a few moments.")
 
-# Calculate coordinates for the first 150 nodes
-locations = []
-for s in sats[:150]:
-    try:
-        subpoint = s.at(t).subpoint()
-        locations.append({
-            'lat': subpoint.latitude.degrees,
-            'lon': subpoint.longitude.degrees,
-            'Name': s.name
-        })
-    except: continue
-
-# 5. THE INTERACTIVE INTERFACE
-df = pd.DataFrame(locations)
-st.map(df, color=map_color)
-
-st.write("---")
-st.subheader("📊 Phase 7: Real-Time Outcomes")
-c1, c2, c3 = st.columns(3)
-c1.metric("Fuel Efficiency", "90%", "+15%")
-c2.metric("Thermal Stability", "92%", "Optimal")
-c3.metric("Drift Status", "Active", "Predictive")
-
-st.info("Founder: Annesha Mazumdar | Space Nova Technical Protocol")
-# Simulated Collision Detection
-st.sidebar.divider()
-st.sidebar.subheader("🛡️ Collision Avoidance")
-if st.sidebar.button("Scan for Proximity"):
-    st.sidebar.error("ALERT: Node 12-B in Proximity to Debris")
-    st.sidebar.info("Protocol: Initiating 48h Thermal-Aware Drift")
-    st.balloons() # To celebrate the successful detection!
+st.divider()
+st.caption("Space Nova Protocol © 2026 | Empowering Orbital Sustainability")

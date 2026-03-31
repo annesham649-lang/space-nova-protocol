@@ -1,5 +1,5 @@
 streamlit
-skyfield
 pandas
-plotly
 numpy
+skyfield
+plotly

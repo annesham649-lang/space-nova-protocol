@@ -2,13 +2,15 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from skyfield.api import load, wgs84
-from datetime import timedelta
 import plotly.express as px
 
 # -------------------------------
 # Page Config
 # -------------------------------
-st.set_page_config(page_title="Space Nova Protocol: Phase 9", layout="wide")
+st.set_page_config(
+    page_title="Space Nova Protocol: Phase 9",
+    layout="wide"
+)
 
 # -------------------------------
 # Load Satellite Data
@@ -17,7 +19,8 @@ st.set_page_config(page_title="Space Nova Protocol: Phase 9", layout="wide")
 def get_satellites():
     url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
     try:
-        return load.tle_file(url)
+        sats = load.tle_file(url)
+        return sats
     except:
         return None
 
@@ -25,7 +28,7 @@ def get_satellites():
 # Collision Probability Model
 # -------------------------------
 def collision_probability(dist_km):
-    sigma = 2  # uncertainty radius (km)
+    sigma = 2  # km uncertainty
     return np.exp(-(dist_km**2) / (2 * sigma**2))
 
 # -------------------------------
@@ -47,11 +50,12 @@ st.sidebar.warning("Scanning future orbital paths...")
 sats = get_satellites()
 
 if sats:
+
     ts = load.timescale()
     t0 = ts.now()
 
     sat_data = []
-    processed_sats = sats[:60]  # limit for performance
+    processed_sats = sats[:50]  # safer limit
 
     # -------------------------------
     # Get current positions
@@ -74,14 +78,14 @@ if sats:
     df = pd.DataFrame(sat_data)
 
     # -------------------------------
-    # Conjunction Analysis (ADVANCED)
+    # Conjunction Analysis
     # -------------------------------
     st.subheader("⚠️ Conjunction Risk Analysis (TCA + Probability)")
 
     alerts = []
 
-    # Create time range (next 60 minutes)
-    time_range = [t0 + i/1440 for i in range(0, 60)]
+    # time steps (next 30 minutes for stability)
+    time_range = [t0 + i / 1440 for i in range(30)]
 
     for i in range(len(df)):
         for j in range(i + 1, len(df)):
@@ -89,7 +93,7 @@ if sats:
             sat_i = df.iloc[i]["Object"]
             sat_j = df.iloc[j]["Object"]
 
-            min_dist = float('inf')
+            min_dist = float("inf")
             tca_time = None
             closing_speed_final = None
 
@@ -110,16 +114,13 @@ if sats:
                         min_dist = dist
                         tca_time = t.utc_iso()
 
-                        # Compute closing speed
                         closing_speed = np.dot(rel_vel, rel_pos)
                         closing_speed_final = closing_speed
 
                 except:
                     continue
 
-            # -------------------------------
-            # Final Risk Check
-            # -------------------------------
+            # Risk filter
             if min_dist < 10 and closing_speed_final is not None and closing_speed_final < 0:
                 pc = collision_probability(min_dist)
 
@@ -150,4 +151,23 @@ if sats:
         lon="Lon",
         hover_name="Name",
         projection="orthographic",
-        title="Live Global Orbital Traffic
+        title="Live Global Orbital Traffic"
+    )
+
+    fig.update_geos(
+        showcountries=True,
+        showocean=True,
+        oceancolor="black",
+        landcolor="gray"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+else:
+    st.error("CelesTrak data unavailable. Try again later.")
+
+# -------------------------------
+# Footer
+# -------------------------------
+st.divider()
+st.caption("Space Nova Protocol © 2026 | Phase 9: Autonomous Conjunction Intelligence")

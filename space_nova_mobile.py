@@ -6,7 +6,7 @@ import pandas as pd
 st.set_page_config(page_title="Space Nova | Global", page_icon="🚀", layout="wide")
 
 # 2. DATA ENGINES (Cached for speed)
-@st.cache_resource
+
 @st.cache_resource
 def get_active_data():
     # Adding a timeout to prevent the 10-minute hang

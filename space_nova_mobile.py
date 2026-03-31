@@ -8,7 +8,7 @@ st.set_page_config(page_title="Space Nova | Global", page_icon="🚀", layout="w
 # 2. DATA ENGINES (Cached for speed)
 @st.cache_resource
 def get_active_data():
-    url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle'
+    url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle'
     return load.tle_file(url)
 
 @st.cache_resource

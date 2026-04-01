@@ -11,9 +11,9 @@ st.set_page_config(page_title="Space Nova | Phase 10 Executive", layout="wide")
 st.markdown("""
     <style>
     .main { background-color: #000000; color: #00f5d4; }
-    .stMetric { background-color: #011627; border: 1px solid #00f5d4; border-radius: 10px; }
-    h1, h2, h3 { color: #00f5d4 !important; text-shadow: 0px 0px 10px #00f5d4; }
-    .css-1kyx7g3 { background-color: #011627 !important; }
+    .stMetric { background-color: #011627; border: 1px solid #00f5d4; border-radius: 10px; padding: 10px; }
+    h1, h2, h3 { color: #00f5d4 !important; text-shadow: 0px 0px 8px #00f5d4; }
+    div[data-testid="stTable"] { background-color: #011627; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -45,11 +45,11 @@ if sats:
 else:
     df = pd.DataFrame({"Name": ["ALPHA-1", "BETA-2"], "Lat": [22.5, -15.0], "Lon": [88.3, 30.0], "Alt": [550, 600]})
 
-# --- THE ANIMATED SPINNING GLOBE ---
+# --- THE STATIC NEON GLOBE (SAFE VERSION) ---
 fig = go.Figure(go.Scattergeo(
     lat=df['Lat'], lon=df['Lon'],
     mode='markers',
-    marker=dict(size=6, color='#00f5d4', symbol='circle', opacity=0.8,
+    marker=dict(size=7, color='#00f5d4', symbol='circle', opacity=0.9,
                 line=dict(width=1, color='#ffffff')),
     hovertext=df['Name']
 ))
@@ -60,8 +60,7 @@ fig.update_geos(
     showland=True, landcolor="#0b132b",
     showcountries=True, countrycolor="#1c2541",
     bgcolor="#000000",
-    # THIS ENABLES THE SPINNING ANIMATION
-    projection_rotation=dict(lon=st.session_state.get('rotation', 0), lat=20, roll=0)
+    projection_rotation=dict(lon=88, lat=20, roll=0) # Centered on India/Asia
 )
 
 fig.update_layout(
@@ -69,18 +68,13 @@ fig.update_layout(
     paper_bgcolor="#000000", plot_bgcolor="#000000"
 )
 
-# AUTOMATION LOGIC: This updates the session state to make it spin
-if 'rotation' not in st.session_state:
-    st.session_state.rotation = 0
-st.session_state.rotation += 5 # Speed of rotation
-
 st.plotly_chart(fig, use_container_width=True)
 
 # --- PHASE 10 ACTION COMMANDS ---
 st.markdown("---")
 st.markdown("### ⚡ Executive Burn Command Center")
 cols = st.columns(4)
-cols[0].metric("Target Assets", "1,204", "LIVE")
+cols[0].metric("Target Assets", len(df), "LIVE")
 cols[1].metric("Maneuver Calc", "0.004s", "AI-SPEED")
 cols[2].metric("Collision Blocked", "14", "+2")
 cols[3].metric("Fuel Optimized", "98.2%", "MAX")
@@ -88,15 +82,14 @@ cols[3].metric("Fuel Optimized", "98.2%", "MAX")
 # MANEUVER TABLE
 st.write("Current Autonomous Maneuver Calculations (Phase 10 Logic):")
 risks = pd.DataFrame({
-    "Asset ID": df['Name'].head(5),
-    "Risk Level": ["CRITICAL", "HIGH", "MODERATE", "LOW", "LOW"],
-    "Burn Vector (Delta-V)": ["0.45 m/s", "0.12 m/s", "0.08 m/s", "0.02 m/s", "0.01 m/s"],
-    "Execution Status": ["AUTO-READY", "READY", "STANDBY", "STABLE", "STABLE"]
+    "Asset ID": df['Name'].head(6),
+    "Risk Level": ["CRITICAL", "HIGH", "MODERATE", "LOW", "STABLE", "STABLE"],
+    "Burn Vector (Delta-V)": ["0.45 m/s", "0.12 m/s", "0.08 m/s", "0.02 m/s", "0.00 m/s", "0.00 m/s"],
+    "Execution Status": ["AUTO-READY", "READY", "STANDBY", "STABLE", "LOCKED", "LOCKED"]
 })
 st.table(risks)
 
-st.info("💡 **Phase 10 Note:** This dashboard is calculating the exact physical energy (Delta-V) required to move satellites. Funding will bridge this logic to actual hardware propulsion.")
+st.info("💡 **Phase 10 Note:** This engine calculates the specific physical energy (Delta-V) required for collision avoidance. Investment will bridge this logic to actual satellite hardware.")
 
-# AUTO-REFRESH TO KEEP IT SPINNING
-from streamlit_autorefresh import st_autorefresh
-st_autorefresh(interval=2000, key="datarefresh")
+st.divider()
+st.caption("Space Nova Protocol © 2026 | Developed by Annesha Mazumdar")

@@ -1,107 +1,85 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
 
-# -------------------------------
-# PAGE CONFIG
-# -------------------------------
-st.set_page_config(
-    page_title="Space Nova Protocol: Phase 10",
-    layout="wide"
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="Space Nova | Phase 10 Executive", layout="wide")
+
+# --- NEON SPACE THEME CSS ---
+st.markdown("""
+    <style>
+    .main { background-color: #000000; color: #00f5d4; }
+    .stMetric { background-color: #011627; border: 1px solid #00f5d4; border-radius: 10px; padding: 15px; }
+    h1, h2, h3 { color: #00f5d4 !important; text-shadow: 0px 0px 10px #00f5d4; font-family: 'Courier New', Courier, monospace; }
+    div[data-testid="stTable"] { background-color: #011627; border-radius: 10px; border: 1px solid #1c2541; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- HEADER ---
+st.title("🛰️ SPACE NOVA PROTOCOL: PHASE 10")
+st.markdown("### **Autonomous Executive Maneuver System**")
+
+# --- GENERATE STABLE ORBITAL DATA ---
+# This ensures the app NEVER crashes while still looking "Live"
+df = pd.DataFrame({
+    "Name": [f"NODE-{i}" for i in range(1, 11)],
+    "Lat": np.random.uniform(-60, 60, 10),
+    "Lon": np.random.uniform(-180, 180, 10),
+    "Risk": np.random.uniform(0.000001, 0.000009, 10)
+})
+
+# --- THE 3D NEON GLOBE ---
+# Restoring the globe from your preferred visuals
+fig = go.Figure(go.Scattergeo(
+    lat=df['Lat'], lon=df['Lon'],
+    mode='markers',
+    marker=dict(size=10, color='#00f5d4', symbol='circle', 
+                line=dict(width=1, color='#ffffff'), opacity=0.8),
+    hovertext=df['Name']
+))
+
+fig.update_geos(
+    projection_type="orthographic",
+    showocean=True, oceancolor="#000814",
+    showland=True, landcolor="#0b132b",
+    showcountries=True, countrycolor="#1c2541",
+    bgcolor="#000000",
+    projection_rotation=dict(lon=88, lat=20, roll=0) # Centered on your region
 )
 
-# -------------------------------
-# HEADER
-# -------------------------------
-st.title("🚀 SPACE NOVA PROTOCOL: PHASE 10")
-st.subheader("Autonomous Executive Maneuver System")
+fig.update_layout(
+    height=600, margin={"r":0,"t":0,"l":0,"b":0},
+    paper_bgcolor="#000000", plot_bgcolor="#000000"
+)
 
-# -------------------------------
-# SAFE DATA GENERATION (NO CRASH)
-# -------------------------------
-try:
-    # Simulated asset data (replace later with real data)
-    data = {
-        "Name": ["SAT-1", "SAT-2", "SAT-3", "SAT-4", "SAT-5"],
-        "Velocity": np.random.uniform(7.5, 8.2, 5),
-        "Altitude": np.random.uniform(400, 1200, 5),
-        "Risk": np.random.uniform(0, 1e-5, 5)
-    }
+st.plotly_chart(fig, use_container_width=True)
 
-    df = pd.DataFrame(data)
-
-except Exception as e:
-    st.error("Data initialization failed")
-    st.write(e)
-    st.stop()
-
-# -------------------------------
-# METRICS
-# -------------------------------
-col1, col2, col3 = st.columns(3)
-
-col1.metric("Assets Tracked", len(df), "Active")
-col2.metric("System Latency", "42 ms", "Optimal")
-col3.metric("Collision Threshold", "1e-6", "Safe")
-
-# -------------------------------
-# GLOBAL VIEW (SAFE PLACEHOLDER)
-# -------------------------------
-st.subheader("🌍 Global Orbital Traffic Monitor")
-
-st.map(pd.DataFrame({
-    "lat": np.random.uniform(-60, 60, 10),
-    "lon": np.random.uniform(-180, 180, 10)
-}))
-
-# -------------------------------
-# MANEUVER SYSTEM
-# -------------------------------
-st.subheader("⚡ Executive Burn Command Center")
-
-try:
-    n = len(df)
-
-    risks = pd.DataFrame({
-        "Asset ID": df["Name"],
-        "Execution Status": ["AUTO-READY"] * n,
-        "Risk Value": df["Risk"]
-    })
-
-    st.dataframe(risks, use_container_width=True)
-
-except Exception as e:
-    st.error("Maneuver calculation error")
-    st.write(e)
-
-# -------------------------------
-# CALCULATION LOOP (FIXED)
-# -------------------------------
-st.subheader("🧠 Autonomous Maneuver Calculations")
-
-try:
-    results = []
-
-    for i in range(min(len(df), 8)):
-        asset = df.iloc[i]
-
-        maneuver_time = round(np.random.uniform(0.001, 0.01), 4)
-
-        results.append({
-            "Asset": asset["Name"],
-            "Maneuver Time (s)": maneuver_time,
-            "Status": "AI-EXECUTED"
-        })
-
-    results_df = pd.DataFrame(results)
-    st.dataframe(results_df, use_container_width=True)
-
-except Exception as e:
-    st.error("Loop execution error")
-    st.write(e)
-
-# -------------------------------
-# FOOTER
-# -------------------------------
+# --- EXECUTIVE METRICS ---
 st.markdown("---")
-st.caption("Space Nova Protocol © 2026 | Developer: Annesha Mazumdar")
+cols = st.columns(4)
+cols[0].metric("Assets Tracked", "1,204", "LIVE")
+cols[1].metric("Maneuver Calc", "0.004s", "AI-SPEED")
+cols[2].metric("Collision Blocked", "14", "+2")
+cols[3].metric("Fuel Optimized", "98.2%", "MAX")
+
+# --- MANEUVER COMMAND TABLE ---
+st.markdown("### ⚡ Executive Burn Command Center")
+risks = pd.DataFrame({
+    "Asset ID": df['Name'].head(5),
+    "Execution Status": ["AUTO-READY", "READY", "STANDBY", "STABLE", "STABLE"],
+    "Risk Value": df['Risk'].head(5).map('{:.7f}'.format)
+})
+st.table(risks)
+
+# --- PHASE 10 CALCULATIONS ---
+st.markdown("### 🧠 Autonomous Maneuver Calculations")
+results = pd.DataFrame({
+    "Asset": df['Name'].head(5),
+    "Maneuver Time (s)": [0.0066, 0.0023, 0.0052, 0.0043, 0.0043],
+    "Status": ["AI-EXECUTED"] * 5
+})
+st.table(results)
+
+st.divider()
+st.caption("Space Nova Protocol © 2026 | Developed by Annesha Mazumdar")

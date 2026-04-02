@@ -1,2 +1,1 @@
-# space-nova-protocol
-Real-time orbital governance monitor for the Space Nova protocol.
+Space Nova | Autonomous Collision Avoidance🛡️ Executive SummarySpace Nova is an autonomous 'Executive' safety layer designed for high-latency orbital environments. Developed in collaboration with ESA/Airbus veterans.🔍 Technical Core: Deterministic Maneuver LogicThe core mathematical logic for the autonomous decision-making loops is located in:space_nova_mobile.pyKey Logic Overview:State Estimation: Real-time processing of orbital TLE (Two-Line Element) data.Collision Probability ($P_c$): Calculated based on covariance scaling for high-risk conjunctions.Deterministic Threshold: If $P_c > 10^{-4}$, the autonomous safety loop bypasses ground latency to execute a delta-V maneuver.

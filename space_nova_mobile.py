@@ -17,7 +17,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- HEADER ---
-st.title("🛰️ SPACE NOVA PROTOCOL: PHASE 10")
+st.title("Autonomous Collision Avoidance System (Software Simulation)")
 st.markdown("### **Autonomous Executive Maneuver System**")
 
 # --- GENERATE STABLE ORBITAL DATA ---

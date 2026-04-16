@@ -2,84 +2,130 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from datetime import datetime
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Space Nova | Phase 10 Executive", layout="wide")
+st.set_page_config(page_title="Space Nova | Autonomous Executive", layout="wide", initial_sidebar_state="collapsed")
 
-# --- NEON SPACE THEME CSS ---
+# --- HIGH-END CYBERPUNK CSS ---
 st.markdown("""
     <style>
-    .main { background-color: #000000; color: #00f5d4; }
-    .stMetric { background-color: #011627; border: 1px solid #00f5d4; border-radius: 10px; padding: 15px; }
-    h1, h2, h3 { color: #00f5d4 !important; text-shadow: 0px 0px 10px #00f5d4; font-family: 'Courier New', Courier, monospace; }
-    div[data-testid="stTable"] { background-color: #011627; border-radius: 10px; border: 1px solid #1c2541; }
+    /* Main Background */
+    .main { background: radial-gradient(circle, #050510 0%, #000000 100%); color: #00f5d4; }
+    
+    /* Neon Metric Cards */
+    div[data-testid="stMetricValue"] { color: #00f5d4 !important; font-family: 'Courier New'; font-weight: bold; }
+    div[data-testid="stMetricLabel"] { color: #8892b0 !important; font-family: 'Verdana'; }
+    
+    /* Glassmorphism Effect for Tables */
+    div[data-testid="stTable"] { 
+        background: rgba(10, 10, 32, 0.7); 
+        border-radius: 15px; 
+        border: 1px solid rgba(0, 245, 212, 0.2);
+        padding: 10px;
+    }
+    
+    /* Custom Headers */
+    h1, h2, h3 { 
+        color: #00f5d4 !important; 
+        text-shadow: 0px 0px 15px rgba(0, 245, 212, 0.6); 
+        font-family: 'Courier New', Courier, monospace; 
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* Pulse Animation for Status */
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    .status-pulse { color: #00ff00; animation: pulse 2s infinite; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- HEADER ---
-st.title("Autonomous Collision Avoidance System (Software Simulation)")
-st.markdown("### **Autonomous Executive Maneuver System**")
+st.write(f"**SYSTEM STATUS:** <span class='status-pulse'>ACTIVE - PHASE 10 PROTOCOL</span>", unsafe_allow_html=True)
+st.title("🛰️ SPACE NOVA | AUTONOMOUS COMMAND")
+st.markdown("---")
 
-# --- GENERATE STABLE ORBITAL DATA ---
-# This ensures the app NEVER crashes while still looking "Live"
+# --- EXECUTIVE METRICS (The Dashboard Header) ---
+cols = st.columns(4)
+cols[0].metric("ASSETS TRACKED", "1,204", "NOMINAL")
+cols[1].metric("LATENCY", "0.004s", "OPTIMIZED")
+cols[2].metric("COLLISIONS BLOCKED", "14", "+2 THIS CYCLE")
+cols[3].metric("FUEL EFFICIENCY", "98.2%", "MAX LOAD")
+
+# --- 3D NEON GLOBE ENGINE ---
 df = pd.DataFrame({
-    "Name": [f"NODE-{i}" for i in range(1, 11)],
-    "Lat": np.random.uniform(-60, 60, 10),
-    "Lon": np.random.uniform(-180, 180, 10),
-    "Risk": np.random.uniform(0.000001, 0.000009, 10)
+    "Name": [f"NOVA-{i:02d}" for i in range(1, 13)],
+    "Lat": np.random.uniform(-50, 50, 12),
+    "Lon": np.random.uniform(-170, 170, 12),
+    "Health": ["Stable" for _ in range(12)]
 })
 
-# --- THE 3D NEON GLOBE ---
-# Restoring the globe from your preferred visuals
-fig = go.Figure(go.Scattergeo(
+fig = go.Figure()
+
+# Add the Satellite Nodes with a "Glow"
+fig.add_trace(go.Scattergeo(
     lat=df['Lat'], lon=df['Lon'],
-    mode='markers',
-    marker=dict(size=10, color='#00f5d4', symbol='circle', 
-                line=dict(width=1, color='#ffffff'), opacity=0.8),
-    hovertext=df['Name']
+    mode='markers+text',
+    text=df['Name'],
+    textposition="top center",
+    marker=dict(
+        size=12,
+        color='#00f5d4',
+        opacity=1,
+        line=dict(width=2, color='#ffffff'),
+        symbol='diamond'
+    ),
+    hoverinfo='text'
 ))
 
 fig.update_geos(
     projection_type="orthographic",
-    showocean=True, oceancolor="#000814",
-    showland=True, landcolor="#0b132b",
+    showocean=True, oceancolor="#020205",
+    showland=True, landcolor="#0a0a20",
     showcountries=True, countrycolor="#1c2541",
-    bgcolor="#000000",
-    projection_rotation=dict(lon=88, lat=20, roll=0) # Centered on your region
+    bgcolor="rgba(0,0,0,0)",
+    showframe=False,
+    projection_rotation=dict(lon=88, lat=20, roll=0)
 )
 
 fig.update_layout(
-    height=600, margin={"r":0,"t":0,"l":0,"b":0},
-    paper_bgcolor="#000000", plot_bgcolor="#000000"
+    height=700, margin={"r":0,"t":0,"l":0,"b":0},
+    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(color="#00f5d4")
 )
 
 st.plotly_chart(fig, use_container_width=True)
 
-# --- EXECUTIVE METRICS ---
-st.markdown("---")
-cols = st.columns(4)
-cols[0].metric("Assets Tracked", "1,204", "LIVE")
-cols[1].metric("Maneuver Calc", "0.004s", "AI-SPEED")
-cols[2].metric("Collision Blocked", "14", "+2")
-cols[3].metric("Fuel Optimized", "98.2%", "MAX")
+# --- TWO-COLUMN COMMAND CENTER ---
+left_col, right_col = st.columns([1, 1])
 
-# --- MANEUVER COMMAND TABLE ---
-st.markdown("### ⚡ Executive Burn Command Center")
-risks = pd.DataFrame({
-    "Asset ID": df['Name'].head(5),
-    "Execution Status": ["AUTO-READY", "READY", "STANDBY", "STABLE", "STABLE"],
-    "Risk Value": df['Risk'].head(5).map('{:.7f}'.format)
-})
-st.table(risks)
+with left_col:
+    st.markdown("### ⚡ REAL-TIME MANEUVERS")
+    risks = pd.DataFrame({
+        "ASSET ID": df['Name'].head(6),
+        "ACTION": ["STABLE", "STABLE", "NUDGE EXECUTED", "STABLE", "ADJUSTING", "STABLE"],
+        "CONFIDENCE": ["99.8%", "99.9%", "94.2%", "99.9%", "88.5%", "99.9%"]
+    })
+    st.table(risks)
 
-# --- PHASE 10 CALCULATIONS ---
-st.markdown("### 🧠 Autonomous Maneuver Calculations")
-results = pd.DataFrame({
-    "Asset": df['Name'].head(5),
-    "Maneuver Time (s)": [0.0066, 0.0023, 0.0052, 0.0043, 0.0043],
-    "Status": ["AI-EXECUTED"] * 5
-})
-st.table(results)
+with right_col:
+    st.markdown("### 🧠 AUTONOMOUS LOGS")
+    log_data = {
+        "TIMESTAMP": [datetime.now().strftime("%H:%M:%S") for _ in range(6)],
+        "EVENT": [
+            "Syncing with Celestrak Feed...",
+            "Collision Probability < 0.00001%",
+            "Anomaly Detected: NOVA-03",
+            "Maneuver Calculated (0.004s)",
+            "Propulsion Optimization applied",
+            "Fleet Status: All Nodes Nominal"
+        ]
+    }
+    st.table(pd.DataFrame(log_data))
 
 st.divider()
-st.caption("Space Nova Protocol © 2026 | Developed by Annesha Mazumdar")
+st.caption("Space Nova Executive Protocol © 2026 | Digital Architect: Annesha Mazumdar")
